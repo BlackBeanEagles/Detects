@@ -24,7 +24,8 @@ sequenceDiagram
     W->>V: submit(receipt, spec)
     V->>D: read head_hash / terminal_receipt_for / seen_nonce
     V->>L: read current_epoch(task_id)
-    V-->>W: VerdictReport (17 checks, ACCEPT/REJECT)
+    V->>V: (opt-in) re-execute the task, compare digests
+    V-->>W: VerdictReport (18 checks, ACCEPT/REJECT)
     alt ACCEPT
         W->>D: append(receipt)  %% chains onto head_hash
     else REJECT
@@ -53,9 +54,11 @@ sequenceDiagram
 
 ## Verifier checks
 
-`verify_receipt(receipt, *, spec, ledger, leases, now, expected_prev_hash)` -
-every context argument optional; absent context marks its checks *skipped*,
-never *failed*. It returns a `VerdictReport` and never raises.
+`verify_receipt(receipt, *, spec, ledger, leases, now, expected_prev_hash,
+reexecutor)` - every context argument optional; absent context marks its
+checks *skipped*, never *failed*. It returns a `VerdictReport` and never
+raises. Passing a `reexecutor` is the one argument that lets the function
+run code; without it the function is pure.
 
 | # | Check | Needs | Catches |
 |---|---|---|---|
@@ -66,16 +69,34 @@ never *failed*. It returns a `VerdictReport` and never raises.
 | 5 | `task_id_matches_spec` | spec | task substitution |
 | 6 | `task_name_matches_spec` | spec | task substitution |
 | 7 | `fixture_known` | - | unknown / renamed task |
-| 8 | `witness_recheck` | spec | fabricated result |
+| 8 | `witness_recheck` | spec | fabricated result (cheap, necessary check) |
 | 9 | `output_digest_matches_witness` | - | digest / witness mismatch |
-| 10 | `no_duplicate_completion` | ledger | duplicate completion |
-| 11 | `nonce_unseen` | ledger | replay |
-| 12 | `lease_epoch_current` | leases | stale ownership |
-| 13 | `within_deadline` | - | late receipt from a timed-out run |
-| 14 | `timestamps_ordered` | - | nonsensical timing |
-| 15 | `not_from_the_future` | now | back/forward-dating |
-| 16 | `prev_ledger_hash_matches` | head | submission out of chain order |
-| 17 | `success_has_witness` | - | a bare `success` with no evidence |
+| 10 | `independent_reexecution` | reexecutor | a wrong result the cheap check can't catch (e.g. a wrong prime) |
+| 11 | `no_duplicate_completion` | ledger | duplicate completion |
+| 12 | `nonce_unseen` | ledger | replay |
+| 13 | `lease_epoch_current` | leases | stale ownership |
+| 14 | `within_deadline` | - | late receipt from a timed-out run |
+| 15 | `timestamps_ordered` | - | nonsensical timing |
+| 16 | `not_from_the_future` | now | back/forward-dating |
+| 17 | `prev_ledger_hash_matches` | head | submission out of chain order |
+| 18 | `success_has_witness` | - | a bare `success` with no evidence |
+
+### Independent re-execution
+
+The `witness_recheck` (#8) proves a *necessary* property from the inputs
+alone. For `nth_prime` that is only "the claimed output is prime" - any
+prime passes, so a worker can sign a wrong one. `independent_reexecution`
+closes the gap for `deterministic` fixtures by re-running the task and
+comparing `output_digest`:
+
+- `InProcessReexecutor` - re-runs in this process (fast; used by
+  `Harness(..., reexecutor=...)` and tests).
+- `SubprocessReexecutor` - re-runs in a clean child (`python -m vouch.reexec`)
+  so nothing the worker's process touched can bias the result; used by
+  `vouch verify --reexecute`.
+
+Non-deterministic fixtures (`slow_task`, `flaky_task`) return
+`nondeterministic` and the check is *skipped*.
 
 ## Trust boundary
 
@@ -100,8 +121,8 @@ and staged as an accepted case in the scoreboard.
 - All identifiers and signatures are computed over **canonical JSON**
   (`sort_keys`, tight separators, `allow_nan=False`).
 - Fixture tasks are pure: no clock, no network, no filesystem. `slow_task`
-  sleeps and `flaky_task` fails-by-attempt-number, both on purpose and both
-  deterministic given their inputs.
+  sleeps and `flaky_task` fails-by-attempt-number - both on purpose, both
+  marked `deterministic=False` so re-execution skips them.
 - Wall-clock time enters through an injectable `Clock`. The single exception
   is the executor's timeout, which must race real elapsed time; the
   timestamps it records still come from the injected clock.

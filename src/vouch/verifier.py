@@ -17,6 +17,7 @@ Checks, in order:
   witness_recheck               cheap re-derivation from inputs believes  [needs spec]
                                 the claimed output
   output_digest_matches_witness output_digest summarizes the witness
+  independent_reexecution       re-running the task reproduces the digest  [needs reexecutor]
   no_duplicate_completion       no earlier success for this task_id       [needs ledger]
   nonce_unseen                  nonce not already in the ledger (replay)  [needs ledger]
   lease_epoch_current           receipt epoch == current lease epoch      [needs leases]
@@ -35,6 +36,7 @@ from .canon import canon_bytes, digest
 from .fixtures import get_fixture
 from .identity import verify as verify_sig
 from .protocols import LeaseReadView, LedgerReadView
+from .reexec import Reexecutor
 from .schema import (
     SUPPORTED_SCHEMA_VERSIONS,
     TaskSpec,
@@ -53,6 +55,7 @@ def verify_receipt(
     leases: LeaseReadView | None = None,
     now: float | None = None,
     expected_prev_hash: str | None = None,
+    reexecutor: Reexecutor | None = None,
     max_witness_bytes: int = 8192,
     clock_skew_s: float = 5.0,
 ) -> VerdictReport:
@@ -144,6 +147,38 @@ def verify_receipt(
                 "output_digest == sha256(witness.claimed_output)"
                 if dig_ok
                 else "output_digest does not match the witness it summarizes",
+            )
+
+    # 5b. independent re-execution (opt-in: only if a reexecutor is given) - #
+    if reexecutor is None:
+        report.add("independent_reexecution", True, "no reexecutor supplied", skipped=True)
+    elif spec is None or fx is None or r["outcome"] != "success":
+        report.add(
+            "independent_reexecution",
+            True,
+            "needs a spec, a known fixture, and outcome=success",
+            skipped=True,
+        )
+    else:
+        res = reexecutor(r["task_name"], spec.inputs)
+        if res.status == "nondeterministic":
+            report.add(
+                "independent_reexecution", True, f"not re-executable: {res.detail}", skipped=True
+            )
+        elif res.status == "error":
+            report.add(
+                "independent_reexecution",
+                False,
+                f"re-execution failed although the receipt claims success: {res.detail}",
+            )
+        else:
+            match = res.output_digest == r["output_digest"]
+            report.add(
+                "independent_reexecution",
+                match,
+                "re-executed output digest matches the receipt"
+                if match
+                else f"re-executed digest {res.output_digest} != receipt {r['output_digest']}",
             )
 
     # 6. duplicate completion --------------------------------------- #

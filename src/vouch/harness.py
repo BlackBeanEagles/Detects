@@ -20,6 +20,7 @@ from .fixtures import get_fixture, registry_hash
 from .identity import runtime_fingerprint, sign, worker_id_for
 from .lease import LeaseManager
 from .ledger import Ledger
+from .reexec import Reexecutor
 from .schema import SCHEMA_VERSION, Receipt, TaskSpec, VerdictReport, task_id_for
 from .verifier import verify_receipt
 
@@ -32,12 +33,14 @@ class Harness:
         ledger: Ledger,
         leases: LeaseManager | None = None,
         clock: Clock | None = None,
+        reexecutor: Reexecutor | None = None,
     ) -> None:
         self.key = private_key
         self.worker_id = worker_id_for(private_key)
         self.ledger = ledger
         self.leases = leases or LeaseManager()
         self.clock: Clock = clock or SystemClock()
+        self.reexecutor = reexecutor
 
     def execute_and_sign(
         self,
@@ -109,6 +112,7 @@ class Harness:
             leases=self.leases,
             now=self.clock.now(),
             expected_prev_hash=self.ledger.head_hash(),
+            reexecutor=self.reexecutor,
         )
         entry = self.ledger.append(receipt) if report.ok else None
         return report, entry

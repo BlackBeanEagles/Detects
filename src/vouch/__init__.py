@@ -28,6 +28,12 @@ from .identity import (
 from .lease import LeaseHeld, LeaseManager
 from .ledger import GENESIS, Ledger
 from .protocols import LeaseReadView, LedgerReadView
+from .reexec import (
+    InProcessReexecutor,
+    ReexecOutcome,
+    Reexecutor,
+    SubprocessReexecutor,
+)
 from .schema import (
     SCHEMA_VERSION,
     Check,
@@ -55,6 +61,7 @@ __all__ = [
     "Fixture",
     # runtime pieces
     "Harness",
+    "InProcessReexecutor",
     "LeaseHeld",
     "LeaseManager",
     "LeaseReadView",
@@ -62,7 +69,10 @@ __all__ = [
     "LedgerReadView",
     "ManualClock",
     "Receipt",
+    "ReexecOutcome",
+    "Reexecutor",
     "Run",
+    "SubprocessReexecutor",
     "SystemClock",
     "TaskSpec",
     "VerdictReport",

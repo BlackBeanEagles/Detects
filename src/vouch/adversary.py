@@ -21,10 +21,12 @@ from .harness import Harness
 from .identity import generate_private_key, sign, worker_id_for
 from .lease import LeaseManager
 from .ledger import Ledger
+from .reexec import InProcessReexecutor
 from .schema import TaskSpec, VerdictReport, task_id_for
 from .verifier import verify_receipt
 
 _Env = tuple[Ed25519PrivateKey, ManualClock, Ledger, LeaseManager, Harness]
+_REEXEC = InProcessReexecutor()
 
 
 @dataclass
@@ -69,6 +71,7 @@ def _verify(
         leases=leases,
         now=clock.now(),
         expected_prev_hash=ledger.head_hash() if prev is None else prev,
+        reexecutor=_REEXEC,
     )
 
 
@@ -207,7 +210,12 @@ def truncated_json() -> AttackResult:
     spec = _sum(5)
     raw = canon_str(h.execute_and_sign(spec))
     report = verify_receipt(
-        raw[: len(raw) // 2], spec=spec, ledger=ledger, leases=leases, now=clock.now()
+        raw[: len(raw) // 2],
+        spec=spec,
+        ledger=ledger,
+        leases=leases,
+        now=clock.now(),
+        reexecutor=_REEXEC,
     )
     return AttackResult(
         "truncated_json",
@@ -223,7 +231,9 @@ def missing_field() -> AttackResult:
     spec = _sum(5)
     r = dict(h.execute_and_sign(spec))
     r.pop("worker_id")
-    report = verify_receipt(r, spec=spec, ledger=ledger, leases=leases, now=clock.now())
+    report = verify_receipt(
+        r, spec=spec, ledger=ledger, leases=leases, now=clock.now(), reexecutor=_REEXEC
+    )
     return AttackResult(
         "missing_field",
         "Submit a receipt that is missing a required field.",
@@ -237,7 +247,9 @@ def unsupported_schema_version() -> AttackResult:
     key, clock, ledger, leases, h = _env()
     spec = _sum(5)
     r = _resign({**dict(h.execute_and_sign(spec)), "schema_version": "0.0"}, key)
-    report = verify_receipt(r, spec=spec, ledger=ledger, leases=leases, now=clock.now())
+    report = verify_receipt(
+        r, spec=spec, ledger=ledger, leases=leases, now=clock.now(), reexecutor=_REEXEC
+    )
     return AttackResult(
         "unsupported_schema_version",
         "Downgrade schema_version (re-signed) to dodge a newer check.",
@@ -253,7 +265,9 @@ def proof_bomb() -> AttackResult:
     r = dict(h.execute_and_sign(spec))
     r["witness"] = {"claimed_output": 15, "pad": "A" * 50_000}
     r = _resign(r, key)
-    report = verify_receipt(r, spec=spec, ledger=ledger, leases=leases, now=clock.now())
+    report = verify_receipt(
+        r, spec=spec, ledger=ledger, leases=leases, now=clock.now(), reexecutor=_REEXEC
+    )
     return AttackResult(
         "proof_bomb",
         "Attach a valid-but-huge witness to exhaust the verifier.",
@@ -286,6 +300,25 @@ def late_success_after_timeout() -> AttackResult:
     )
 
 
+def signed_wrong_prime() -> AttackResult:
+    key, clock, ledger, leases, h = _env()
+    spec = TaskSpec(name="nth_prime", inputs={"n": 10}, declared_postconditions=["output_is_prime"])
+    r = dict(h.execute_and_sign(spec))
+    # the 10th prime is 29; claim 7 - still prime, so the cheap check is fooled
+    r["witness"] = {"claimed_output": 7}
+    r["output_digest"] = digest(7)
+    r = _resign(r, key)
+    report = _verify(r, spec=spec, ledger=ledger, leases=leases, clock=clock)
+    return AttackResult(
+        "signed_wrong_prime",
+        "Sign a wrong (but still prime) nth_prime result. witness_recheck only "
+        "tests primality; independent re-execution recomputes 29 and catches it.",
+        report,
+        True,
+        "independent_reexecution",
+    )
+
+
 # --------------------------------------------------------------------------- #
 # Documented limitations - NOT rejected, by design
 # --------------------------------------------------------------------------- #
@@ -296,8 +329,9 @@ def honest_but_unsound_process() -> AttackResult:
     report = _verify(r, spec=spec, ledger=ledger, leases=leases, clock=clock)
     return AttackResult(
         "honest_but_unsound_process",
-        "Correct result reached by unsound or wasteful reasoning. vouch checks "
-        "the result, not the process - accepted, by design.",
+        "Correct result reached by unsound or wasteful reasoning. Even "
+        "independent re-execution only confirms the result, not the path to "
+        "it - accepted, by design.",
         report,
         False,
         None,
@@ -339,6 +373,7 @@ ATTACKS: list[Callable[[], AttackResult]] = [
     unsupported_schema_version,
     proof_bomb,
     late_success_after_timeout,
+    signed_wrong_prime,
     honest_but_unsound_process,
     forged_runtime_fingerprint,
 ]

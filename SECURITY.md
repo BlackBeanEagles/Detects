@@ -24,7 +24,9 @@ and run `vouch scoreboard`. In summary:
 Full detail in [README](README.md#what-this-harness-does-not-verify) and
 [ARCHITECTURE](ARCHITECTURE.md#trust-boundary). Headlines:
 
-1. Semantic correctness beyond a fixture's cheap, recomputable postcondition.
+1. An agent's reasoning. The result is checked - by the cheap witness, and
+   (opt-in) by re-executing deterministic fixtures - but not the path to it,
+   and a non-deterministic task with no reexecutor is trusted on its digest.
 2. Forged `runtime` metadata - `worker_id` is a local keypair, not
    attestation.
 3. Dishonest clocks - timestamps are self-reported; no timestamp authority.

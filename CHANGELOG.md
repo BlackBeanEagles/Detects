@@ -6,6 +6,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `independent_reexecution` verifier check (#10 of 18) - opt-in via a
+  `reexecutor`. `InProcessReexecutor` and `SubprocessReexecutor`
+  (`python -m vouch.reexec`, wired to `vouch verify --reexecute` and
+  `vouch run --reexecute`). `verify_receipt` stays pure unless a reexecutor
+  is passed.
+- `nth_prime` fixture, whose cheap witness check ("is prime") is necessary
+  but not sufficient - it exists to make re-execution earn its place.
+- `Fixture.deterministic` flag; `slow_task` / `flaky_task` set it `False`
+  and re-execution skips them.
+- Adversary case `signed_wrong_prime` (a wrong-but-prime result the cheap
+  check misses); 13 forgeries + 2 documented limitations.
+- `tests/test_invariants.py` - four named invariants backed by Hypothesis
+  (one terminal success per task; verdict stable over time; any unsigned
+  mutation ⇒ REJECT and never removes a failure; a re-signed lie stays
+  caught). `tests/test_reexecution.py`.
+
 ## [0.1.0] - 2026-09-06
 
 ### Added

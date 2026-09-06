@@ -1,8 +1,8 @@
 """``vouch`` command line.
 
     vouch keygen       [--out worker.key]
-    vouch run          --task sum_range --inputs '{"n": 100}' [--deadline 5] [--max-attempts 3]
-    vouch verify       --receipt rcpt_XXXX.json [--task sum_range --inputs '{"n": 100}'] [--json]
+    vouch run          --task sum_range --inputs '{"n": 100}' [--deadline 5] [--reexecute]
+    vouch verify       --receipt R.json [--task T --inputs '{...}'] [--reexecute] [--json]
     vouch verify-chain [--ledger ledger.jsonl]
     vouch ledger       [--ledger ledger.jsonl] [--json]
     vouch scoreboard
@@ -25,6 +25,7 @@ from .harness import Harness
 from .identity import generate_private_key, load_private_key, save_private_key, worker_id_for
 from .lease import LeaseManager
 from .ledger import Ledger
+from .reexec import InProcessReexecutor, SubprocessReexecutor
 from .schema import TaskSpec, VerdictReport
 from .scoreboard import main as run_scoreboard
 from .verifier import verify_receipt
@@ -68,7 +69,13 @@ def cmd_run(a: argparse.Namespace) -> int:
         print(f"(generated new key at {a.key})", file=sys.stderr)
 
     ledger = Ledger(a.ledger)
-    harness = Harness(private_key=key, ledger=ledger, leases=LeaseManager(), clock=SystemClock())
+    harness = Harness(
+        private_key=key,
+        ledger=ledger,
+        leases=LeaseManager(),
+        clock=SystemClock(),
+        reexecutor=InProcessReexecutor() if a.reexecute else None,
+    )
     spec = _spec(a)
     assert spec is not None  # --task is required on this subcommand
     receipt = harness.execute_and_sign(spec, deadline_s=a.deadline, max_attempts=a.max_attempts)
@@ -94,6 +101,7 @@ def cmd_verify(a: argparse.Namespace) -> int:
         leases=None,
         now=SystemClock().now(),
         expected_prev_hash=None,
+        reexecutor=SubprocessReexecutor() if a.reexecute else None,
     )
     print(_verdict_json(report) if a.json else report.summary())
 
@@ -164,6 +172,9 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--ledger", default="ledger.jsonl")
     r.add_argument("--deadline", type=float, default=5.0)
     r.add_argument("--max-attempts", type=int, default=3, dest="max_attempts")
+    r.add_argument(
+        "--reexecute", action="store_true", help="re-run the task in-process at submit time"
+    )
     r.set_defaults(fn=cmd_run)
 
     v = sub.add_parser("verify", help="re-verify a stored receipt")
@@ -173,6 +184,11 @@ def build_parser() -> argparse.ArgumentParser:
     v.add_argument("--inputs", default="{}")
     v.add_argument("--postconditions", default="")
     v.add_argument("--json", action="store_true", help="machine-readable VerdictReport")
+    v.add_argument(
+        "--reexecute",
+        action="store_true",
+        help="re-run the task in a clean subprocess and compare digests",
+    )
     v.set_defaults(fn=cmd_verify)
 
     c = sub.add_parser("verify-chain", help="check ledger hash-chain integrity")
