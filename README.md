@@ -23,6 +23,11 @@ still assigned the route?*
 Everything here uses **synthetic fixtures and locally generated keys**. No
 network, no live credentials.
 
+**Docs:** [DESIGN.md](DESIGN.md) is the reasoning (decisions, rejected
+alternatives, trust boundary, non-goals); [ARCHITECTURE.md](ARCHITECTURE.md)
+is the reference (lifecycle diagram, field tables, the 18 checks);
+[NOTES.md](NOTES.md) is the five-bullet trial note.
+
 ---
 
 ## Quickstart

@@ -23,6 +23,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (one terminal success per task; verdict stable over time; any unsigned
   mutation ⇒ REJECT and never removes a failure; a re-signed lie stays
   caught). `tests/test_reexecution.py`.
+- `DESIGN.md` - the reasoning behind the design: decisions and rejected
+  alternatives, the trust boundary as prose, and explicit non-goals.
 
 ## [0.1.0] - 2026-09-06
 
