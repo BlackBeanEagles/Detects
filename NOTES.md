@@ -5,6 +5,17 @@
 
 Hi Ryan - here's where `vouch` landed and how I'd take it further.
 
+On scope: the implementation is bounded to the brief - schema with
+canonical-JSON content addressing, immutable signed receipt, ledger, leases,
+executor, harness, verifier, synthetic fixtures. Two things sit just outside
+it and both buy reliability rather than surface area. `vouch scoreboard`
+runs a bundled "cheating agent" (13 forgeries) straight through the verifier,
+so every failure path is executable, not asserted once in a test.
+`independent_reexecution` is opt-in and off by default - the verifier stays
+a pure function unless you hand it a `reexecutor`. Neither adds a branch to
+the happy path, and both are a clean removal if you'd rather the harness be
+leaner.
+
 - **What passed.** The core loop works the way I wanted: a worker claims a
   lease, runs a task, and emits an Ed25519-signed receipt that carries a
   *witness* - proof material the verifier can cheaply re-derive from the
@@ -17,8 +28,9 @@ Hi Ryan - here's where `vouch` landed and how I'd take it further.
   and a late receipt from a timed-out run. On top of that, `nth_prime` +
   `independent_reexecution` catch a wrong result the cheap witness check
   can't (any prime passes "is it prime"), and `tests/test_invariants.py`
-  pins four named properties with Hypothesis. ~49 tests, ~92% coverage,
-  bundled adversary 13/13 forgeries caught.
+  pins four named properties with Hypothesis. ~48 tests, ~93% coverage; the
+  bundled adversary catches all 13 forgeries and documents 2 accepted
+  limitations.
 
 - **What's honestly still weak.** Re-execution is opt-in and only covers
   `deterministic` fixtures - `slow_task` / `flaky_task` are skipped, and if
