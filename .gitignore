@@ -1,0 +1,22 @@
+# vouch
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+
+# tooling caches / reports
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+coverage.xml
+htmlcov/
+
+# local run artifacts
+*.key
+ledger.jsonl
+rcpt_*.json
