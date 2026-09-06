@@ -1,41 +1,51 @@
-# Five-bullet note
+# Notes on the build
 
-> Draft, from the scaffold's behaviour. Rewrite in your own voice and add
-> anything you changed or discovered while finishing it.
+<!-- Ryan asked for a five-bullet note: what passed, what failed, what I'd
+     improve next. Swap in your own numbers/phrasing before sending. -->
 
-- **What passed.** Happy path produces an Ed25519-signed, proof-carrying
-  receipt that chains into an append-only ledger and re-verifies standalone.
-  All five required failure modes are rejected by a *named* check, with the
-  reason surfaced in the `VerdictReport`: duplicate completion
-  (`no_duplicate_completion`), stale ownership (`lease_epoch_current`),
-  invalid evidence (`signature_valid` / `witness_recheck` / `fixture_known`),
-  malformed evidence (`schema_parseable` and friends, no traceback leak),
-  timeout + retry (executor + `within_deadline`). `vouch scoreboard`: 12/12
-  forgeries rejected, 2/2 documented limitations still accepted. 24 tests
-  green in ~3s.
+Hi Ryan - here's where `vouch` landed and how I'd take it further.
 
-- **What failed / where it is weak.** The witness re-check is only as strong
-  as the fixture's cheap postcondition; for a task with no cheap check the
-  verifier trusts a self-computed `output_digest` (staged as
-  `honest_but_unsound_process`). Runtime identity is a local keypair, not
-  attestation - `forged_runtime_fingerprint` passes. Timestamps are
-  self-reported; the deadline check only catches a receipt that admits
-  lateness. A timed-out worker thread is abandoned, not killed.
+- **What passed.** The core loop works the way I wanted: a worker claims a
+  lease, runs a task, and emits an Ed25519-signed receipt that carries a
+  *witness* - proof material the verifier can cheaply re-derive from the
+  inputs alone. The verifier is a pure function (17 named checks, returns a
+  report, never raises), so I can point it at a stored receipt later and get
+  the same answer. All five failure modes I set out to cover are rejected by
+  a specific named check, not a vague "invalid": duplicate completion, stale
+  ownership (fencing-token epoch), bad signature / tampered body / fabricated
+  witness, malformed bytes (parser fails to one typed error, no traceback),
+  and a late receipt from a timed-out run. 35 tests, ~94% coverage, and the
+  bundled adversary reports 12/12 forgeries caught.
 
-- **Design choices worth noting.** The verifier is a pure function with all
-  context optional (absent context -> checks marked *skipped*, not failed),
-  so the same code gates submission and re-audits a stored receipt.
-  Determinism comes from canonical JSON + content addressing + an injectable
-  clock. Fencing tokens (monotonic lease epochs) are what make stale
-  ownership a one-line check.
+- **What failed / where it's honestly weak.** The witness re-check is only as
+  strong as the fixture's cheap postcondition. For a task where I can't
+  re-derive the answer from the inputs, the verifier ends up trusting a
+  self-computed `output_digest` - I staged that as `honest_but_unsound_process`
+  and it passes, by design. Same story for the `runtime` block: it's
+  self-asserted, so `forged_runtime_fingerprint` (a worker lying about its
+  code version) also passes. Timestamps are self-reported; the deadline check
+  only catches a receipt that *admits* being late.
 
-- **What I'd improve next.** (1) Independent re-execution in the verifier for
-  weak-witness tasks. (2) A trusted timestamp source. (3) SQLite ledger with
-  signed checkpoints to detect truncation, not just in-place edits.
-  (4) `hypothesis` fuzzing of the parser and witness checks. (5) Quorum:
-  N-of-M workers must agree before finalize.
+- **A real bug I hit while building.** My first cut had the verifier take the
+  ledger and run the replay / duplicate checks on every call. That meant
+  re-verifying a receipt that was *already accepted* would fail on
+  `nonce_unseen`. I split it: those checks are submission-time only
+  (inside the harness), and `vouch verify` now re-checks a stored receipt in
+  isolation and separately reports whether the ledger has it and whether the
+  chain is intact.
 
-- **Scope / honesty.** Single verifier, single ledger, no consensus, no
-  sandbox, trusted fixture code. `vouch` verifies structure, identity, and
-  recomputable postconditions - not reasoning, side effects, or a
-  compromised host. Full list in README "What this harness does not verify".
+- **What I'd do next, in priority order.** (1) Independent re-execution -
+  have the verifier re-run the fixture in a clean process and compare digests
+  instead of trusting the witness where the cheap check is weak; that closes
+  the biggest gap above. (2) A trusted timestamp source (or have the
+  gatekeeper clock the run itself). (3) Move the ledger to SQLite with signed
+  checkpoints so truncation is detectable, not just in-place edits. (4) More
+  Hypothesis coverage on the witness checks. (5) Quorum: N-of-M workers must
+  agree before a task finalizes.
+
+- **What I'm not claiming.** Single verifier, single ledger, no consensus, no
+  sandbox, fixtures are trusted code. `vouch` verifies structure, identity,
+  and recomputable postconditions - not an agent's reasoning, its side
+  effects, or a compromised host. The full list is in the README under
+  "What this harness does not verify," and every item there is staged as an
+  accepted case in `vouch scoreboard` so the gaps are visible, not buried.
