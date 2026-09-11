@@ -44,6 +44,7 @@ sequenceDiagram
 | `worker_id` | **source identity** | `ed25519:<pubkey>` |
 | `runtime` | source identity | code version / python / platform / registry hash - *self-asserted* |
 | `outcome` | result | `success` / `failure` / `timeout` |
+| `detail` | result | human-readable reason from the executor (which attempt, what it raised, or that it exceeded the deadline) |
 | `output_digest` | result | `sha256(canonical(output))` |
 | `witness` | result | proof material the verifier can cheaply re-check |
 | `postconditions` | result | declared checks + pass/fail detail |

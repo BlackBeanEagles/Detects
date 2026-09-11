@@ -79,6 +79,7 @@ class Receipt(BaseModel):
     worker_id: str
     runtime: dict[str, Any]
     outcome: Literal["success", "failure", "timeout"]
+    detail: str
     output_digest: str | None
     postconditions: list[dict[str, Any]]
     witness: dict[str, Any]
@@ -89,13 +90,13 @@ class Receipt(BaseModel):
     prev_ledger_hash: str
     signature: str | None = None
 
-    def unsigned(self) -> dict:
-        d = self.model_dump()
-        d.pop("signature", None)
-        return d
 
-    def signing_payload(self) -> bytes:
-        return canon_bytes(self.unsigned())
+def signing_payload(receipt: dict) -> bytes:
+    """Canonical bytes a receipt's signature is computed over: the receipt
+    with its ``signature`` field removed. The one definition the harness
+    signs against and the verifier checks against, so they can never drift
+    apart."""
+    return canon_bytes({k: v for k, v in receipt.items() if k != "signature"})
 
 
 def parse_receipt(raw: Any) -> dict:

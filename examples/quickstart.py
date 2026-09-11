@@ -15,10 +15,11 @@ from vouch import (
     ManualClock,
     TaskSpec,
     generate_private_key,
+    signing_payload,
     verify_receipt,
 )
 from vouch.adversary import stale_ownership
-from vouch.canon import canon_bytes, digest
+from vouch.canon import digest
 from vouch.identity import sign
 
 
@@ -49,9 +50,7 @@ def main() -> None:
     print("3. tamper with a copy: claim a different, unsorted result")
     forged = dict(receipt)
     forged["witness"] = {"claimed_output": [9, 3, 7, 1, 3]}
-    forged["signature"] = sign(
-        harness.key, canon_bytes({k: v for k, v in forged.items() if k != "signature"})
-    )
+    forged["signature"] = sign(harness.key, signing_payload(forged))
     bad = verify_receipt(forged, spec=spec, ledger=ledger, leases=harness.leases, now=clock.now())
     print(f"   verdict: {'ACCEPT' if bad.ok else 'REJECT'}")
     for c in bad.failed():
@@ -64,9 +63,7 @@ def main() -> None:
     pr = dict(harness.execute_and_sign(prime_spec))  # honest answer is 29
     pr["witness"] = {"claimed_output": 7}
     pr["output_digest"] = digest(7)
-    pr["signature"] = sign(
-        harness.key, canon_bytes({k: v for k, v in pr.items() if k != "signature"})
-    )
+    pr["signature"] = sign(harness.key, signing_payload(pr))
     without = verify_receipt(pr, spec=prime_spec, now=clock.now())
     withre = verify_receipt(pr, spec=prime_spec, now=clock.now(), reexecutor=InProcessReexecutor())
     print(f"   witness_recheck alone: {'ACCEPT' if without.ok else 'REJECT'}")

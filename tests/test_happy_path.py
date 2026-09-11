@@ -9,6 +9,7 @@ def test_happy_path_accepts_and_chains(harness, ledger, sum_spec):
     assert receipt["outcome"] == "success"
     assert receipt["witness"]["claimed_output"] == 5050
     assert receipt["attempt"] == 1
+    assert "succeeded on attempt 1" in receipt["detail"]
 
     report, entry = harness.submit(receipt, sum_spec)
     assert report.ok, report.summary()

@@ -44,6 +44,7 @@ from .schema import (
     VouchError,
     VouchParseError,
     parse_receipt,
+    signing_payload,
     task_id_for,
 )
 from .verifier import verify_receipt
@@ -93,6 +94,7 @@ __all__ = [
     "save_private_key",
     "sha256_hex",
     "sign",
+    "signing_payload",
     "task_id_for",
     "verify",
     # the verifier

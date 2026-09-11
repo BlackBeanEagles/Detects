@@ -25,6 +25,32 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   caught). `tests/test_reexecution.py`.
 - `DESIGN.md` - the reasoning behind the design: decisions and rejected
   alternatives, the trust boundary as prose, and explicit non-goals.
+- `tests/test_protocols.py` - `Ledger` / `LeaseManager` actually satisfy the
+  `LedgerReadView` / `LeaseReadView` protocols the verifier is typed against.
+
+### Changed
+
+- `Run` is now constructed and used inside `Harness.execute_and_sign` - it
+  had been declared to satisfy "deterministic task/run schema" but nothing
+  built one. Now the run's identity fields are validated through it, not
+  inlined as loose dict entries.
+- The "canonical bytes minus `signature`" computation that `harness.py`,
+  `verifier.py`, `adversary.py`, and six test files each re-implemented is
+  now one function, `schema.signing_payload`.
+
+### Fixed
+
+- `Receipt.detail` - the executor already computed a human-readable reason
+  for every outcome ("attempt 2 raised RuntimeError: ...", "exceeded
+  deadline of 0.1s") and the harness silently discarded it. A `failure` or
+  `timeout` receipt now carries that reason instead of an empty postcondition
+  list.
+
+### Removed
+
+- `Receipt.unsigned()` / `Receipt.signing_payload()` - dead: nothing called
+  them, since signing happens on a plain dict before it becomes a `Receipt`.
+  Superseded by the module-level `signing_payload`.
 
 ## [0.1.0] - 2026-09-06
 

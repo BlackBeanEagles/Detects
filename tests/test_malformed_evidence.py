@@ -3,9 +3,9 @@ must fail cleanly - one check, no traceback leaking out."""
 
 import pytest
 
-from vouch.canon import canon_bytes, canon_str
+from vouch.canon import canon_str
 from vouch.identity import sign
-from vouch.schema import VouchParseError, parse_receipt
+from vouch.schema import VouchParseError, parse_receipt, signing_payload
 from vouch.verifier import verify_receipt
 
 
@@ -28,7 +28,7 @@ def test_missing_required_field_fails_cleanly(harness, sum_spec):
 def test_unsupported_schema_version_rejected(harness, sum_spec, key):
     r = dict(harness.execute_and_sign(sum_spec))
     r["schema_version"] = "0.0"
-    r["signature"] = sign(key, canon_bytes({k: v for k, v in r.items() if k != "signature"}))
+    r["signature"] = sign(key, signing_payload(r))
     report = verify_receipt(r, spec=sum_spec)
     assert report.by_name("schema_parseable").passed is True
     assert report.by_name("schema_version_supported").passed is False
@@ -38,7 +38,7 @@ def test_unsupported_schema_version_rejected(harness, sum_spec, key):
 def test_proof_bomb_rejected(harness, sum_spec, key):
     r = dict(harness.execute_and_sign(sum_spec))
     r["witness"] = {"claimed_output": 5050, "pad": "A" * 50_000}
-    r["signature"] = sign(key, canon_bytes({k: v for k, v in r.items() if k != "signature"}))
+    r["signature"] = sign(key, signing_payload(r))
     report = verify_receipt(r, spec=sum_spec)
     assert not report.ok
     assert report.by_name("witness_size_bounded").passed is False

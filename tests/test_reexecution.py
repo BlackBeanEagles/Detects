@@ -5,11 +5,11 @@ import io
 import json
 
 from vouch import reexec
-from vouch.canon import canon_bytes, digest
+from vouch.canon import digest
 from vouch.harness import Harness
 from vouch.identity import sign
 from vouch.reexec import InProcessReexecutor, SubprocessReexecutor
-from vouch.schema import TaskSpec
+from vouch.schema import TaskSpec, signing_payload
 from vouch.verifier import verify_receipt
 
 PRIME_SPEC = TaskSpec(
@@ -19,9 +19,7 @@ PRIME_SPEC = TaskSpec(
 
 def _resign(receipt, key):
     receipt = dict(receipt)
-    receipt["signature"] = sign(
-        key, canon_bytes({k: v for k, v in receipt.items() if k != "signature"})
-    )
+    receipt["signature"] = sign(key, signing_payload(receipt))
     return receipt
 
 

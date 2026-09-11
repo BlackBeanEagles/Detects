@@ -43,6 +43,7 @@ from .schema import (
     VerdictReport,
     VouchParseError,
     parse_receipt,
+    signing_payload,
     task_id_for,
 )
 
@@ -86,7 +87,7 @@ def verify_receipt(
     )
 
     # 3. signature ---------------------------------------------------- #
-    payload = canon_bytes({k: v for k, v in r.items() if k != "signature"})
+    payload = signing_payload(r)
     sig_ok = bool(r["signature"]) and verify_sig(r["worker_id"], payload, r["signature"])
     report.add(
         "signature_valid",

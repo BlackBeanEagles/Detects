@@ -21,9 +21,12 @@ def test_expired_owner_receipt_rejected(ledger, leases, clock):
     receipt = worker_a.execute_and_sign(spec, lease_ttl_s=10)
     assert receipt["lease_epoch"] == 1
 
+    assert leases.holder(task_id_for(spec)) == worker_a.worker_id
+
     clock.advance(20)  # A's 10s lease has expired
     leases.claim(task_id_for(spec), worker_id_for(key_b), ttl_s=10, now=clock.now())
     assert leases.current_epoch(task_id_for(spec)) == 2
+    assert leases.holder(task_id_for(spec)) == worker_id_for(key_b)
 
     report = verify_receipt(
         receipt,
@@ -43,6 +46,8 @@ def test_expired_owner_receipt_rejected(ledger, leases, clock):
 
 def test_active_lease_blocks_a_second_worker(leases, clock):
     tid = "sha256:abc"
+    assert leases.holder(tid) is None
+    assert leases.current_epoch(tid) == 0
     leases.claim(tid, "ed25519:aaaa", ttl_s=10, now=clock.now())
     with pytest.raises(LeaseHeld):
         leases.claim(tid, "ed25519:bbbb", ttl_s=10, now=clock.now())

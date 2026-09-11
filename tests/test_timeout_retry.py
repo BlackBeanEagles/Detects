@@ -1,9 +1,9 @@
 """Failure mode 5: timeout and retry - a slow run is timed out (and its late
 receipt rejected), a flaky run is retried, an always-failing run gives up."""
 
-from vouch.canon import canon_bytes, digest
+from vouch.canon import digest
 from vouch.identity import sign
-from vouch.schema import TaskSpec
+from vouch.schema import TaskSpec, signing_payload
 from vouch.verifier import verify_receipt
 
 
@@ -17,6 +17,7 @@ def test_slow_task_times_out(harness):
     assert r["outcome"] == "timeout"
     assert r["witness"] == {}
     assert r["output_digest"] is None
+    assert "exceeded deadline" in r["detail"]
 
 
 def test_late_success_after_timeout_is_rejected(harness, key):
@@ -30,7 +31,7 @@ def test_late_success_after_timeout_is_rejected(harness, key):
     r["finished_at"] = r["deadline_at"] + 5.0
     r["witness"] = {"claimed_output": 55}
     r["output_digest"] = digest(55)
-    r["signature"] = sign(key, canon_bytes({k: v for k, v in r.items() if k != "signature"}))
+    r["signature"] = sign(key, signing_payload(r))
 
     report = verify_receipt(
         r,
@@ -54,6 +55,7 @@ def test_flaky_task_retries_then_succeeds(harness):
     assert r["outcome"] == "success"
     assert r["attempt"] == 3
     assert r["witness"]["claimed_output"] == 55
+    assert "attempt 3" in r["detail"]
 
 
 def test_flaky_task_gives_up_after_max_attempts(harness):
@@ -66,3 +68,4 @@ def test_flaky_task_gives_up_after_max_attempts(harness):
     assert r["outcome"] == "failure"
     assert r["attempt"] == 3
     assert r["output_digest"] is None
+    assert "RuntimeError" in r["detail"]

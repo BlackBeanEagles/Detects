@@ -19,9 +19,10 @@ from vouch import (
     ManualClock,
     TaskSpec,
     generate_private_key,
+    signing_payload,
     verify_receipt,
 )
-from vouch.canon import canon_bytes, digest
+from vouch.canon import digest
 from vouch.identity import sign
 
 PCS = ["output_equals_closed_form"]
@@ -148,7 +149,7 @@ def test_resigning_a_lie_does_not_launder_it(n):
     lie = n * (n + 1) // 2 + 1
     r["witness"] = {"claimed_output": lie}
     r["output_digest"] = digest(lie)
-    r["signature"] = sign(h.key, canon_bytes({k: v for k, v in r.items() if k != "signature"}))
+    r["signature"] = sign(h.key, signing_payload(r))
 
     report = verify_receipt(r, spec=spec, now=clock.now())
     assert report.by_name("signature_valid").passed  # the re-sign worked

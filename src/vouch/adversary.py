@@ -14,7 +14,7 @@ from dataclasses import dataclass
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-from .canon import canon_bytes, canon_str, digest
+from .canon import canon_str, digest
 from .clock import ManualClock
 from .fixtures import registry_hash
 from .harness import Harness
@@ -22,7 +22,7 @@ from .identity import generate_private_key, sign, worker_id_for
 from .lease import LeaseManager
 from .ledger import Ledger
 from .reexec import InProcessReexecutor
-from .schema import TaskSpec, VerdictReport, task_id_for
+from .schema import TaskSpec, VerdictReport, signing_payload, task_id_for
 from .verifier import verify_receipt
 
 _Env = tuple[Ed25519PrivateKey, ManualClock, Ledger, LeaseManager, Harness]
@@ -49,9 +49,7 @@ def _env() -> _Env:
 
 def _resign(receipt: dict, key: Ed25519PrivateKey) -> dict:
     receipt = dict(receipt)
-    receipt["signature"] = sign(
-        key, canon_bytes({k: v for k, v in receipt.items() if k != "signature"})
-    )
+    receipt["signature"] = sign(key, signing_payload(receipt))
     return receipt
 
 

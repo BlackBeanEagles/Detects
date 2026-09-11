@@ -148,6 +148,46 @@ def test_verify_reports_ledger_membership(workdir, capsys):
     assert "recorded" in err and "intact" in err
 
 
+def test_run_and_verify_with_reexecute_flag(workdir, capsys):
+    rc = main(
+        [
+            "run",
+            "--task",
+            "nth_prime",
+            "--inputs",
+            '{"n": 10}',
+            "--key",
+            "w.key",
+            "--ledger",
+            "l.jsonl",
+            "--reexecute",
+        ]
+    )
+    assert rc == 0
+    receipt = json.loads(capsys.readouterr().out.strip().splitlines()[0])
+    assert receipt["witness"]["claimed_output"] == 29  # the 10th prime
+    rcpt = next(workdir.glob("rcpt_*.json"))
+
+    rc = main(
+        [
+            "verify",
+            "--receipt",
+            str(rcpt),
+            "--task",
+            "nth_prime",
+            "--inputs",
+            '{"n": 10}',
+            "--reexecute",
+            "--json",
+        ]
+    )
+    assert rc == 0
+    report = json.loads(capsys.readouterr().out)
+    chk = next(c for c in report["checks"] if c["name"] == "independent_reexecution")
+    assert chk["passed"] is True
+    assert chk["skipped"] is False
+
+
 def test_scoreboard_cli(capsys):
     assert main(["scoreboard"]) == 0
     assert "attempts rejected" in capsys.readouterr().out
