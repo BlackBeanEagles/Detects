@@ -28,7 +28,7 @@ leaner.
   and a late receipt from a timed-out run. On top of that, `nth_prime` +
   `independent_reexecution` catch a wrong result the cheap witness check
   can't (any prime passes "is it prime"), and `tests/test_invariants.py`
-  pins four named properties with Hypothesis. ~48 tests, ~93% coverage; the
+  pins four named properties with Hypothesis. ~54 tests, ~94% coverage; the
   bundled adversary catches all 13 forgeries and documents 2 accepted
   limitations.
 

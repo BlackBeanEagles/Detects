@@ -41,7 +41,7 @@ python -m venv .venv
 # POSIX:    source .venv/bin/activate
 pip install -e ".[dev]"      # or:  make install
 
-pytest                        # ~49 tests           (make test)
+pytest                        # ~54 tests           (make test)
 vouch scoreboard              # the bundled adversary (13 caught, 2 accepted)
 python examples/quickstart.py # narrated end-to-end run
 ```
@@ -199,7 +199,7 @@ examples/        quickstart.py
 
 - **ruff** - lint + format check (`ruff check`, `ruff format --check`)
 - **mypy** - `strict = true` over `src/vouch`
-- **pytest** - ~49 tests with `--cov`; coverage gate at 85% (currently ~92%)
+- **pytest** - ~54 tests with `--cov`; coverage gate at 85% (currently ~94%)
 - **`vouch scoreboard`** - the adversary must match its documentation
 
 `pre-commit` config is included (`pre-commit install`).
