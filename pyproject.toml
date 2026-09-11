@@ -37,9 +37,9 @@ dev = [
 ]
 
 [project.urls]
-Documentation = "https://example.invalid/vouch#readme"
-Source = "https://example.invalid/vouch"
-Changelog = "https://example.invalid/vouch/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/BlackBeanEagles/vouch#readme"
+Source = "https://github.com/BlackBeanEagles/vouch"
+Changelog = "https://github.com/BlackBeanEagles/vouch/blob/main/CHANGELOG.md"
 
 [project.scripts]
 vouch = "vouch.cli:main"

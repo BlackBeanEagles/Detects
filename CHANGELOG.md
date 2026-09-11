@@ -80,5 +80,5 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Tooling: ruff, mypy (strict), coverage gate, pre-commit, GitHub Actions
   matrix (3.11-3.13).
 
-[Unreleased]: https://example.invalid/vouch/compare/v0.1.0...HEAD
-[0.1.0]: https://example.invalid/vouch/releases/tag/v0.1.0
+[Unreleased]: https://github.com/BlackBeanEagles/vouch/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/BlackBeanEagles/vouch/releases/tag/v0.1.0
