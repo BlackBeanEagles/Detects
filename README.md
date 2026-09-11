@@ -30,21 +30,33 @@ is the reference (lifecycle diagram, field tables, the 18 checks);
 
 ---
 
-## Quickstart
+## Verifying this
 
-Requires Python 3.11+.
+**Zero setup:** the CI badge at the top is live - every push runs the full
+gate (lint, format, types, tests, adversary scoreboard) on Python
+3.11 / 3.12 / 3.13, on GitHub's own runners, not mine. Click it, or see
+[Actions](https://github.com/BlackBeanEagles/Detects/actions).
+
+**Two minutes, locally:**
 
 ```bash
 git clone https://github.com/BlackBeanEagles/Detects.git && cd Detects
 python -m venv .venv
 # Windows:  .venv\Scripts\activate
 # POSIX:    source .venv/bin/activate
-pip install -e ".[dev]"       # or:  make install
+pip install -e ".[dev]"
 
-pytest                         # ~54 tests           (make test)
-detects scoreboard             # the bundled adversary (13 caught, 2 accepted)
-python examples/quickstart.py  # narrated end-to-end run
+pytest                          # expect: 54 passed
+detects scoreboard               # expect: 13/15 attempts rejected; all rows match the documentation
+python examples/quickstart.py   # narrated end-to-end run, including a REJECT
 ```
+
+Then pick a failure mode straight from the brief and read the test that
+proves it: [`test_duplicate_completion.py`](tests/test_duplicate_completion.py),
+[`test_stale_ownership.py`](tests/test_stale_ownership.py),
+[`test_invalid_evidence.py`](tests/test_invalid_evidence.py),
+[`test_malformed_evidence.py`](tests/test_malformed_evidence.py),
+[`test_timeout_retry.py`](tests/test_timeout_retry.py) - one file each.
 
 ### CLI
 
