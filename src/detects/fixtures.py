@@ -11,7 +11,7 @@ Each fixture is a pure function plus a *witness* pair:
 The cheap check is *necessary* but not always *sufficient*: ``nth_prime``
 only proves the claimed output is prime, so a worker can sign a wrong prime
 and pass it. Fixtures marked ``deterministic`` can be re-run independently
-by :mod:`vouch.reexec` to close that gap.
+by :mod:`detects.reexec` to close that gap.
 
 No fixture touches the network, the filesystem, or the wall clock (except
 ``slow_task``, which sleeps on purpose so timeouts can be tested, and
@@ -39,7 +39,7 @@ class Fixture:
     check_witness: Callable[[dict, dict], tuple[bool, str]]
     deterministic: bool = True
     """True iff re-running with the same inputs always yields the same output,
-    so :mod:`vouch.reexec` can verify it by independent re-execution."""
+    so :mod:`detects.reexec` can verify it by independent re-execution."""
 
 
 def _H(v: Any) -> Any:

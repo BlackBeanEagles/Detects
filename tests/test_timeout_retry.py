@@ -1,10 +1,10 @@
 """Failure mode 5: timeout and retry - a slow run is timed out (and its late
 receipt rejected), a flaky run is retried, an always-failing run gives up."""
 
-from vouch.canon import digest
-from vouch.identity import sign
-from vouch.schema import TaskSpec, signing_payload
-from vouch.verifier import verify_receipt
+from detects.canon import digest
+from detects.identity import sign
+from detects.schema import TaskSpec, signing_payload
+from detects.verifier import verify_receipt
 
 
 def test_slow_task_times_out(harness):

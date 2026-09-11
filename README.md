@@ -1,6 +1,6 @@
-# vouch
+# detects
 
-[![CI](https://github.com/BlackBeanEagles/vouch/actions/workflows/ci.yml/badge.svg)](https://github.com/BlackBeanEagles/vouch/actions/workflows/ci.yml)
+[![CI](https://github.com/BlackBeanEagles/Detects/actions/workflows/ci.yml/badge.svg)](https://github.com/BlackBeanEagles/Detects/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)](pyproject.toml)
 [![Checked with mypy](https://img.shields.io/badge/mypy-strict-2a6db2)](pyproject.toml)
 [![Ruff](https://img.shields.io/badge/lint-ruff-000000)](pyproject.toml)
@@ -8,7 +8,7 @@
 
 A small, standalone **agent-execution verification harness**.
 
-An "agent" (any autonomous worker) claims it completed a task. `vouch` turns
+An "agent" (any autonomous worker) claims it completed a task. `detects` turns
 that claim into an **immutable, independently checkable evidence receipt**
 that binds three identities together - *what was asked*, *which run produced
 it*, and *what code/worker ran it* - and a **pure verifier** that can be
@@ -35,26 +35,26 @@ is the reference (lifecycle diagram, field tables, the 18 checks);
 Requires Python 3.11+.
 
 ```bash
-cd ryan
+git clone https://github.com/BlackBeanEagles/Detects.git && cd Detects
 python -m venv .venv
 # Windows:  .venv\Scripts\activate
 # POSIX:    source .venv/bin/activate
-pip install -e ".[dev]"      # or:  make install
+pip install -e ".[dev]"       # or:  make install
 
-pytest                        # ~54 tests           (make test)
-vouch scoreboard              # the bundled adversary (13 caught, 2 accepted)
-python examples/quickstart.py # narrated end-to-end run
+pytest                         # ~54 tests           (make test)
+detects scoreboard             # the bundled adversary (13 caught, 2 accepted)
+python examples/quickstart.py  # narrated end-to-end run
 ```
 
 ### CLI
 
 ```bash
-vouch keygen --out worker.key
-vouch run --task sum_range --inputs '{"n": 100}'          # execute + sign + submit
-vouch verify --receipt rcpt_XXXX.json --task nth_prime --inputs '{"n": 10}' [--reexecute] [--json]
-vouch verify-chain --ledger ledger.jsonl
-vouch ledger --ledger ledger.jsonl [--json]
-vouch scoreboard
+detects keygen --out worker.key
+detects run --task sum_range --inputs '{"n": 100}'          # execute + sign + submit
+detects verify --receipt rcpt_XXXX.json --task nth_prime --inputs '{"n": 10}' [--reexecute] [--json]
+detects verify-chain --ledger ledger.jsonl
+detects ledger --ledger ledger.jsonl [--json]
+detects scoreboard
 ```
 
 ---
@@ -95,7 +95,7 @@ alone:
 The cheap check is *necessary* but not always *sufficient* - `nth_prime`
 shows it: a worker can sign a wrong-but-prime answer and slip past. Passing
 a **reexecutor** adds `independent_reexecution`, which re-runs the task
-(in-process, or in a clean subprocess via `vouch verify --reexecute`) and
+(in-process, or in a clean subprocess via `detects verify --reexecute`) and
 compares `output_digest`. That is the one input to `verify_receipt` that
 lets it run code; without it the function stays pure. Non-deterministic
 fixtures are skipped, and re-execution still cannot judge an agent's
@@ -129,7 +129,7 @@ Concrete failure modes exercised by `tests/` (one file each):
 | Timeout & retry | slow task past deadline; late receipt; flaky task; give-up | `within_deadline`; executor retry/backoff |
 | Wrong result the cheap check misses | a signed but wrong `nth_prime` (still prime) | `independent_reexecution` |
 
-`vouch scoreboard` runs all 15 adversary cases (13 caught, 2 accepted
+`detects scoreboard` runs all 15 adversary cases (13 caught, 2 accepted
 limitations) and asserts each matches its documented expectation.
 `tests/test_property.py` fuzzes the parser and witness checks with
 Hypothesis; `tests/test_invariants.py` backs four named invariants
@@ -140,7 +140,7 @@ mutation ⇒ REJECT and never removes a failure; a re-signed lie stays caught).
 
 ## What this harness does **not** verify
 
-This is the honest part. `vouch` checks structure, identity, and
+This is the honest part. `detects` checks structure, identity, and
 declared-and-recomputable postconditions. It does **not** establish:
 
 1. **An agent's reasoning.** `witness_recheck` and (opt-in)
@@ -157,7 +157,7 @@ declared-and-recomputable postconditions. It does **not** establish:
    deadline check only catches a receipt that *admits* finishing late;
    there is no trusted timestamp authority. `not_from_the_future` is a
    coarse sanity bound against the verifier's own clock.
-4. **Side effects.** `vouch` sees a returned value and a witness. A task
+4. **Side effects.** `detects` sees a returned value and a witness. A task
    that also wrote to a database or sent an email is outside its view.
 5. **Byzantine / multi-node conditions.** Single verifier, single ledger,
    no quorum, no consensus. A compromised verifier host or ledger writer
@@ -172,7 +172,7 @@ See also [SECURITY.md](SECURITY.md).
 ## Layout
 
 ```
-src/vouch/
+src/detects/
   canon.py       canonical JSON + sha256
   clock.py       injectable clocks
   identity.py    Ed25519 keys, sign/verify, runtime fingerprint
@@ -198,9 +198,9 @@ examples/        quickstart.py
 `make check` (and CI, on 3.11 / 3.12 / 3.13) runs:
 
 - **ruff** - lint + format check (`ruff check`, `ruff format --check`)
-- **mypy** - `strict = true` over `src/vouch`
+- **mypy** - `strict = true` over `src/detects`
 - **pytest** - ~54 tests with `--cov`; coverage gate at 85% (currently ~94%)
-- **`vouch scoreboard`** - the adversary must match its documentation
+- **`detects scoreboard`** - the adversary must match its documentation
 
 `pre-commit` config is included (`pre-commit install`).
 

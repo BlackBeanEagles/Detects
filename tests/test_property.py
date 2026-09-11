@@ -1,4 +1,4 @@
-"""Property-based tests: the parser must never leak a non-vouch exception,
+"""Property-based tests: the parser must never leak a non-detects exception,
 canonical JSON must round-trip, and the witness checks must be sound under
 random inputs."""
 
@@ -7,10 +7,10 @@ import json
 from hypothesis import given
 from hypothesis import strategies as st
 
-from vouch.canon import canon_str
-from vouch.fixtures import get_fixture
-from vouch.schema import VouchParseError, parse_receipt
-from vouch.verifier import verify_receipt
+from detects.canon import canon_str
+from detects.fixtures import get_fixture
+from detects.schema import DetectsParseError, parse_receipt
+from detects.verifier import verify_receipt
 
 _json = st.recursive(
     st.none() | st.booleans() | st.integers() | st.text(),
@@ -20,10 +20,10 @@ _json = st.recursive(
 
 
 @given(st.one_of(st.binary(), st.text(), _json))
-def test_parse_receipt_only_raises_vouch_parse_error(blob):
+def test_parse_receipt_only_raises_detects_parse_error(blob):
     try:
         parse_receipt(blob)
-    except VouchParseError:
+    except DetectsParseError:
         pass
     except Exception as exc:
         raise AssertionError(f"parse_receipt leaked {type(exc).__name__}: {exc}") from exc

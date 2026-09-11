@@ -1,20 +1,20 @@
 """Independent re-execution.
 
-The cheap witness check in :mod:`vouch.fixtures` proves a *necessary*
+The cheap witness check in :mod:`detects.fixtures` proves a *necessary*
 property of a result. For some tasks that is also *sufficient*; for others -
 ``nth_prime`` is the example in this repo - it is not: any prime passes the
 witness check, so a worker can sign a wrong prime and slip past.
 
 Re-execution closes that gap for deterministic fixtures: run the task again,
 independently, and compare output digests. It is deliberately *not* baked
-into :func:`vouch.verifier.verify_receipt` unconditionally - that function
+into :func:`detects.verifier.verify_receipt` unconditionally - that function
 stays pure. You opt in by passing a ``reexecutor``. Two are provided:
 
 * :class:`InProcessReexecutor` - fast, re-runs in this process. Used by the
   harness's own submit path (``Harness(..., reexecutor=...)``) and by tests.
 * :class:`SubprocessReexecutor` - re-runs in a clean child process
-  (``python -m vouch.reexec``), so nothing the worker's process mutated can
-  influence the result. Slower; used by ``vouch verify --reexecute``.
+  (``python -m detects.reexec``), so nothing the worker's process mutated can
+  influence the result. Slower; used by ``detects verify --reexecute``.
 
 Non-deterministic fixtures (``slow_task``, ``flaky_task``) report
 ``nondeterministic`` and the verifier marks the check *skipped*.
@@ -73,7 +73,7 @@ class InProcessReexecutor:
 
 
 class SubprocessReexecutor:
-    """Re-run the fixture in a clean child process (``python -m vouch.reexec``)."""
+    """Re-run the fixture in a clean child process (``python -m detects.reexec``)."""
 
     def __init__(self, python: str | None = None, timeout_s: float = 15.0) -> None:
         self.python = python or sys.executable
@@ -86,7 +86,7 @@ class SubprocessReexecutor:
         payload = json.dumps({"task_name": task_name, "inputs": inputs})
         try:
             proc = subprocess.run(
-                [self.python, "-m", "vouch.reexec"],
+                [self.python, "-m", "detects.reexec"],
                 input=payload,
                 capture_output=True,
                 text=True,

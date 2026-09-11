@@ -3,7 +3,7 @@
 Wall-clock time is an input, not an ambient fact. Every component that needs
 "now" is handed a Clock, which keeps the harness deterministic and
 replayable in tests. The one documented exception is the timeout mechanism
-in :mod:`vouch.executor`: it must use real elapsed time because it races a
+in :mod:`detects.executor`: it must use real elapsed time because it races a
 worker thread.
 """
 

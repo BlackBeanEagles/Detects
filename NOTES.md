@@ -3,12 +3,12 @@
 <!-- Ryan asked for a five-bullet note: what passed, what failed, what I'd
      improve next. Swap in your own numbers/phrasing before sending. -->
 
-Hi Ryan - here's where `vouch` landed and how I'd take it further.
+Hi Ryan - here's where `detects` landed and how I'd take it further.
 
 On scope: the implementation is bounded to the brief - schema with
 canonical-JSON content addressing, immutable signed receipt, ledger, leases,
 executor, harness, verifier, synthetic fixtures. Two things sit just outside
-it and both buy reliability rather than surface area. `vouch scoreboard`
+it and both buy reliability rather than surface area. `detects scoreboard`
 runs a bundled "cheating agent" (13 forgeries) straight through the verifier,
 so every failure path is executable, not asserted once in a test.
 `independent_reexecution` is opt-in and off by default - the verifier stays
@@ -45,7 +45,7 @@ leaner.
   ledger and run the replay / duplicate checks on every call. That meant
   re-verifying a receipt that was *already accepted* failed on `nonce_unseen`.
   I split it: those checks are submission-time only (inside the harness), and
-  `vouch verify` now re-checks a stored receipt in isolation and separately
+  `detects verify` now re-checks a stored receipt in isolation and separately
   reports whether the ledger has it and whether the chain is intact.
 
 - **What I'd do next, in priority order.** (1) Re-execution for
@@ -58,8 +58,8 @@ leaner.
   agree before a task finalizes.
 
 - **What I'm not claiming.** Single verifier, single ledger, no consensus, no
-  sandbox, fixtures are trusted code. `vouch` verifies structure, identity,
+  sandbox, fixtures are trusted code. `detects` verifies structure, identity,
   and recomputable postconditions - not an agent's reasoning, its side
   effects, or a compromised host. The full list is in the README under
   "What this harness does not verify," and every item there is staged as an
-  accepted case in `vouch scoreboard` so the gaps are visible, not buried.
+  accepted case in `detects scoreboard` so the gaps are visible, not buried.

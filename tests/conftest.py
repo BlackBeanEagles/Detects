@@ -1,11 +1,11 @@
 import pytest
 
-from vouch.clock import ManualClock
-from vouch.harness import Harness
-from vouch.identity import generate_private_key
-from vouch.lease import LeaseManager
-from vouch.ledger import Ledger
-from vouch.schema import TaskSpec
+from detects.clock import ManualClock
+from detects.harness import Harness
+from detects.identity import generate_private_key
+from detects.lease import LeaseManager
+from detects.ledger import Ledger
+from detects.schema import TaskSpec
 
 
 @pytest.fixture

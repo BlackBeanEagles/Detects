@@ -1,4 +1,4 @@
-"""Named invariants - the properties vouch is supposed to guarantee, each
+"""Named invariants - the properties detects is supposed to guarantee, each
 backed by a property-based test.
 
   I1  A task_id has at most one terminal `success` in the ledger.
@@ -12,7 +12,7 @@ backed by a property-based test.
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from vouch import (
+from detects import (
     Harness,
     LeaseManager,
     Ledger,
@@ -22,8 +22,8 @@ from vouch import (
     signing_payload,
     verify_receipt,
 )
-from vouch.canon import digest
-from vouch.identity import sign
+from detects.canon import digest
+from detects.identity import sign
 
 PCS = ["output_equals_closed_form"]
 

@@ -3,9 +3,9 @@ views the verifier depends on. If either drifts (a rename, a dropped
 method), this fails immediately instead of surfacing as a mysterious
 AttributeError deep inside verify_receipt."""
 
-from vouch.lease import LeaseManager
-from vouch.ledger import Ledger
-from vouch.protocols import LeaseReadView, LedgerReadView
+from detects.lease import LeaseManager
+from detects.ledger import Ledger
+from detects.protocols import LeaseReadView, LedgerReadView
 
 
 def test_ledger_satisfies_ledger_read_view():

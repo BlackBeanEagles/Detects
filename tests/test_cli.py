@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from vouch.cli import main
+from detects.cli import main
 
 
 @pytest.fixture
@@ -17,7 +17,7 @@ def test_version(capsys):
     with pytest.raises(SystemExit) as ei:
         main(["--version"])
     assert ei.value.code == 0
-    assert "vouch" in capsys.readouterr().out
+    assert "detects" in capsys.readouterr().out
 
 
 def test_keygen_run_verify_chain_ledger(workdir, capsys):

@@ -1,7 +1,7 @@
 """The verifier: a pure function over a receipt and some optional context.
 
 ``verify_receipt`` never mutates anything and never raises on bad input - it
-returns a :class:`~vouch.schema.VerdictReport` of named checks. You can point
+returns a :class:`~detects.schema.VerdictReport` of named checks. You can point
 it at receipts it did not create; every piece of context is optional and the
 corresponding checks are marked *skipped* when it is absent.
 
@@ -39,9 +39,9 @@ from .protocols import LeaseReadView, LedgerReadView
 from .reexec import Reexecutor
 from .schema import (
     SUPPORTED_SCHEMA_VERSIONS,
+    DetectsParseError,
     TaskSpec,
     VerdictReport,
-    VouchParseError,
     parse_receipt,
     signing_payload,
     task_id_for,
@@ -65,7 +65,7 @@ def verify_receipt(
     # 0. parse -------------------------------------------------------------- #
     try:
         r = parse_receipt(receipt)
-    except VouchParseError as e:
+    except DetectsParseError as e:
         report.add("schema_parseable", False, str(e))
         return report
     report.add("schema_parseable", True, "well-formed JSON matching the Receipt schema")

@@ -20,7 +20,7 @@ cov:  ## tests with coverage report
 	pytest --cov --cov-report=term-missing
 
 scoreboard:  ## run the bundled adversary
-	vouch scoreboard
+	detects scoreboard
 
 check: lint type test  ## everything CI runs
 

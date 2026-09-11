@@ -1,6 +1,6 @@
 # Architecture
 
-`vouch` answers one question: **can this claim that an agent completed a task
+`detects` answers one question: **can this claim that an agent completed a task
 be believed?** It does that with three content-addressed objects, an
 append-only log, and a pure verifier.
 
@@ -92,9 +92,9 @@ comparing `output_digest`:
 
 - `InProcessReexecutor` - re-runs in this process (fast; used by
   `Harness(..., reexecutor=...)` and tests).
-- `SubprocessReexecutor` - re-runs in a clean child (`python -m vouch.reexec`)
+- `SubprocessReexecutor` - re-runs in a clean child (`python -m detects.reexec`)
   so nothing the worker's process touched can bias the result; used by
-  `vouch verify --reexecute`.
+  `detects verify --reexecute`.
 
 Non-deterministic fixtures (`slow_task`, `flaky_task`) return
 `nondeterministic` and the check is *skipped*.

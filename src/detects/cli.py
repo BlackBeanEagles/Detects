@@ -1,11 +1,11 @@
-"""``vouch`` command line.
+"""``detects`` command line.
 
-    vouch keygen       [--out worker.key]
-    vouch run          --task sum_range --inputs '{"n": 100}' [--deadline 5] [--reexecute]
-    vouch verify       --receipt R.json [--task T --inputs '{...}'] [--reexecute] [--json]
-    vouch verify-chain [--ledger ledger.jsonl]
-    vouch ledger       [--ledger ledger.jsonl] [--json]
-    vouch scoreboard
+    detects keygen       [--out worker.key]
+    detects run          --task sum_range --inputs '{"n": 100}' [--deadline 5] [--reexecute]
+    detects verify       --receipt R.json [--task T --inputs '{...}'] [--reexecute] [--json]
+    detects verify-chain [--ledger ledger.jsonl]
+    detects ledger       [--ledger ledger.jsonl] [--json]
+    detects scoreboard
 
 Exit code is 0 on success / ACCEPT / intact chain, 1 otherwise.
 """
@@ -156,7 +156,7 @@ def cmd_scoreboard(a: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="vouch", description="agent-execution verification harness")
+    p = argparse.ArgumentParser(prog="detects", description="agent-execution verification harness")
     p.add_argument("-V", "--version", action="version", version=f"%(prog)s {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
 

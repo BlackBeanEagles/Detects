@@ -11,10 +11,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .schema import VouchError
+from .schema import DetectsError
 
 
-class LeaseHeld(VouchError):
+class LeaseHeld(DetectsError):
     """Raised when a different worker holds an unexpired lease on the task."""
 
 

@@ -2,15 +2,15 @@
 
 ## Scope
 
-`vouch` is a verification *harness*, not a production trust anchor. It runs
+`detects` is a verification *harness*, not a production trust anchor. It runs
 entirely on **synthetic fixtures with locally generated keys**. It makes no
 network calls and requires no credentials. Do not point it at real workloads
 without first reading the limitations below.
 
 ## Threat model
 
-The working adversary is executable: see [`src/vouch/adversary.py`](src/vouch/adversary.py)
-and run `vouch scoreboard`. In summary:
+The working adversary is executable: see [`src/detects/adversary.py`](src/detects/adversary.py)
+and run `detects scoreboard`. In summary:
 
 - **Adversary can** submit arbitrary bytes to the verifier, and may replay,
   truncate, re-sign, back-date, pad, or substitute anything it sends. It may
@@ -19,7 +19,7 @@ and run `vouch scoreboard`. In summary:
   (only the harness appends, only after an ACCEPT verdict); the reference
   clock passed to the verifier at submission time.
 
-## What `vouch` does not defend against
+## What `detects` does not defend against
 
 Full detail in [README](README.md#what-this-harness-does-not-verify) and
 [ARCHITECTURE](ARCHITECTURE.md#trust-boundary). Headlines:

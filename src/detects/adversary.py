@@ -2,8 +2,8 @@
 
 Each function stages one forgery or fault and runs it past the verifier,
 returning an :class:`AttackResult`. ``run_all`` executes the whole catalogue;
-:mod:`vouch.scoreboard` renders it as a table. The rows marked
-``expected_caught=False`` are documented limitations - things vouch does not
+:mod:`detects.scoreboard` renders it as a table. The rows marked
+``expected_caught=False`` are documented limitations - things detects does not
 reject, by design - and the test-suite asserts they stay that way.
 """
 
@@ -351,7 +351,7 @@ def forged_runtime_fingerprint() -> AttackResult:
     return AttackResult(
         "forged_runtime_fingerprint",
         "Lie about code_version / platform in the runtime block. The signature "
-        "is valid and vouch has no attestation to contradict it - accepted.",
+        "is valid and detects has no attestation to contradict it - accepted.",
         report,
         False,
         None,

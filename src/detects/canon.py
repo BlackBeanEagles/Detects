@@ -1,6 +1,6 @@
 """Canonical serialization and content hashing.
 
-Every identifier and every signature in vouch is computed over *canonical
+Every identifier and every signature in detects is computed over *canonical
 JSON*: UTF-8, keys sorted, no insignificant whitespace, no NaN/Infinity.
 Two structurally equal objects therefore always produce the same bytes, the
 same SHA-256 digest, and the same signature. That property is what

@@ -3,11 +3,11 @@ re-assigned to someone else."""
 
 import pytest
 
-from vouch.harness import Harness
-from vouch.identity import generate_private_key, worker_id_for
-from vouch.lease import LeaseHeld
-from vouch.schema import TaskSpec, task_id_for
-from vouch.verifier import verify_receipt
+from detects.harness import Harness
+from detects.identity import generate_private_key, worker_id_for
+from detects.lease import LeaseHeld
+from detects.schema import TaskSpec, task_id_for
+from detects.verifier import verify_receipt
 
 
 def test_expired_owner_receipt_rejected(ledger, leases, clock):

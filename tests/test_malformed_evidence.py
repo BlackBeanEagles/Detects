@@ -3,10 +3,10 @@ must fail cleanly - one check, no traceback leaking out."""
 
 import pytest
 
-from vouch.canon import canon_str
-from vouch.identity import sign
-from vouch.schema import VouchParseError, parse_receipt, signing_payload
-from vouch.verifier import verify_receipt
+from detects.canon import canon_str
+from detects.identity import sign
+from detects.schema import DetectsParseError, parse_receipt, signing_payload
+from detects.verifier import verify_receipt
 
 
 def test_truncated_json_fails_cleanly(harness, sum_spec):
@@ -45,10 +45,10 @@ def test_proof_bomb_rejected(harness, sum_spec, key):
 
 
 def test_non_utf8_input_raises_parse_error():
-    with pytest.raises(VouchParseError):
+    with pytest.raises(DetectsParseError):
         parse_receipt(b"\x80\x81\x82 not json")
 
 
 def test_non_object_json_raises_parse_error():
-    with pytest.raises(VouchParseError):
+    with pytest.raises(DetectsParseError):
         parse_receipt("[1, 2, 3]")

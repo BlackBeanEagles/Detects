@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "vouch"
+name = "detects"
 version = "0.1.0"
 description = "A standalone agent-execution verification harness"
 readme = "README.md"
@@ -37,18 +37,18 @@ dev = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/BlackBeanEagles/vouch#readme"
-Source = "https://github.com/BlackBeanEagles/vouch"
-Changelog = "https://github.com/BlackBeanEagles/vouch/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/BlackBeanEagles/Detects#readme"
+Source = "https://github.com/BlackBeanEagles/Detects"
+Changelog = "https://github.com/BlackBeanEagles/Detects/blob/main/CHANGELOG.md"
 
 [project.scripts]
-vouch = "vouch.cli:main"
+detects = "detects.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-vouch = ["py.typed"]
+detects = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -56,7 +56,7 @@ addopts = "-q --strict-markers --strict-config"
 pythonpath = ["src"]
 
 [tool.coverage.run]
-source = ["vouch"]
+source = ["detects"]
 branch = true
 
 [tool.coverage.report]
@@ -85,7 +85,7 @@ docstring-code-format = true
 [tool.mypy]
 python_version = "3.11"
 mypy_path = "src"
-packages = ["vouch"]
+packages = ["detects"]
 plugins = ["pydantic.mypy"]
 strict = true
 disallow_any_generics = false

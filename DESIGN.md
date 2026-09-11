@@ -1,6 +1,6 @@
 # Design
 
-This is the reasoning behind `vouch` - the problem, the shape I chose, the
+This is the reasoning behind `detects` - the problem, the shape I chose, the
 decisions I made and the ones I rejected, and where the boundary sits.
 [README.md](README.md) is the user-facing guide; [ARCHITECTURE.md](ARCHITECTURE.md)
 is the reference (field tables, the check list, the lifecycle diagram). This
@@ -56,7 +56,7 @@ Sometimes that is the whole story (`sum_range`); sometimes it is not
 with a fixture that has it, and closable with opt-in re-execution, rather
 than pretending the cheap check is always enough.
 
-**Limits are a feature, not an apology.** Every "vouch can't check this" is
+**Limits are a feature, not an apology.** Every "detects can't check this" is
 staged as an accepted case in the adversary scoreboard, so the gaps are
 executable and visible instead of buried in a caveats paragraph.
 
@@ -137,7 +137,7 @@ JSON, because receipts should be readable in the ledger and diffable in
 review. pydantic v2 with `extra="forbid"`, because an unknown field should
 be a hard error, not silently dropped. `parse_receipt` is the single choke
 point - every byte string, dict, or garbage blob goes through it and comes
-out either a normalized dict or a typed `VouchParseError`, never a stray
+out either a normalized dict or a typed `DetectsParseError`, never a stray
 traceback. `schema_version` is an explicit checked field with an allow-list,
 so a producer on a newer format is rejected loudly rather than misread.
 Protobuf or msgpack would be smaller and faster; I need neither, and
@@ -145,7 +145,7 @@ readability in the audit log is worth more here.
 
 ### Scope of "task": synthetic fixtures with a determinism flag
 
-vouch verifies fixtures from a known registry, not arbitrary submitted code.
+detects verifies fixtures from a known registry, not arbitrary submitted code.
 Verifying arbitrary code pulls in sandboxing, resource limits, and a real
 threat model for the executor itself - a project of its own, and orthogonal
 to "is this completion claim believable." The `deterministic` flag on a

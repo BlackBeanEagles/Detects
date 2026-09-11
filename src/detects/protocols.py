@@ -1,8 +1,8 @@
 """Structural interfaces the pure verifier depends on.
 
 The verifier never writes and never needs a concrete class - only these
-read-only views. :class:`~vouch.ledger.Ledger` and
-:class:`~vouch.lease.LeaseManager` satisfy them structurally, and a test or
+read-only views. :class:`~detects.ledger.Ledger` and
+:class:`~detects.lease.LeaseManager` satisfy them structurally, and a test or
 an alternate backend can supply anything else that matches.
 """
 

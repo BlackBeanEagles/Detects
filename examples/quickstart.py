@@ -7,7 +7,7 @@ catching a wrong-but-plausible result, and runs one bundled adversary case.
 
 from __future__ import annotations
 
-from vouch import (
+from detects import (
     Harness,
     InProcessReexecutor,
     LeaseManager,
@@ -18,9 +18,9 @@ from vouch import (
     signing_payload,
     verify_receipt,
 )
-from vouch.adversary import stale_ownership
-from vouch.canon import digest
-from vouch.identity import sign
+from detects.adversary import stale_ownership
+from detects.canon import digest
+from detects.identity import sign
 
 
 def main() -> None:

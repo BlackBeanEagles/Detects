@@ -25,11 +25,11 @@ SCHEMA_VERSION = "1.0"
 SUPPORTED_SCHEMA_VERSIONS = {"1.0"}
 
 
-class VouchError(Exception):
-    """Base class for every error vouch raises on purpose."""
+class DetectsError(Exception):
+    """Base class for every error detects raises on purpose."""
 
 
-class VouchParseError(VouchError, ValueError):
+class DetectsParseError(DetectsError, ValueError):
     """Raised when raw input cannot be parsed into a Receipt at all
     (not valid UTF-8 / not JSON / not an object / fails schema validation)."""
 
@@ -101,24 +101,24 @@ def signing_payload(receipt: dict) -> bytes:
 
 def parse_receipt(raw: Any) -> dict:
     """Parse arbitrary input into a normalized receipt dict, or raise
-    ``VouchParseError``. This is the single choke point that turns malformed
+    ``DetectsParseError``. This is the single choke point that turns malformed
     evidence into a clean, typed failure instead of a traceback."""
     if isinstance(raw, (bytes, bytearray)):
         try:
             raw = bytes(raw).decode("utf-8")
         except UnicodeDecodeError as e:
-            raise VouchParseError(f"not valid UTF-8: {e}") from e
+            raise DetectsParseError(f"not valid UTF-8: {e}") from e
     if isinstance(raw, str):
         try:
             raw = json.loads(raw)
         except json.JSONDecodeError as e:
-            raise VouchParseError(f"not valid JSON: {e}") from e
+            raise DetectsParseError(f"not valid JSON: {e}") from e
     if not isinstance(raw, dict):
-        raise VouchParseError(f"receipt must be a JSON object, got {type(raw).__name__}")
+        raise DetectsParseError(f"receipt must be a JSON object, got {type(raw).__name__}")
     try:
         return Receipt.model_validate(raw).model_dump()
     except ValidationError as e:
-        raise VouchParseError(f"failed schema validation: {e.error_count()} error(s)") from e
+        raise DetectsParseError(f"failed schema validation: {e.error_count()} error(s)") from e
 
 
 # --------------------------------------------------------------------------- #

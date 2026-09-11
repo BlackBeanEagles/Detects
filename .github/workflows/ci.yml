@@ -33,4 +33,4 @@ jobs:
       - name: Tests
         run: pytest --cov --cov-report=term-missing --cov-report=xml
       - name: Adversary scoreboard
-        run: vouch scoreboard
+        run: detects scoreboard

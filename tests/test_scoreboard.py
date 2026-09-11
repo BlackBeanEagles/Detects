@@ -2,8 +2,8 @@
 every forgery rejected (by the named check), every documented limitation
 still accepted."""
 
-from vouch.adversary import run_all
-from vouch.scoreboard import format_table
+from detects.adversary import run_all
+from detects.scoreboard import format_table
 
 
 def test_every_attack_matches_its_documentation():

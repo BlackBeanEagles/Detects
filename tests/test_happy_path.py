@@ -1,7 +1,7 @@
 """The path that should work: run a task, get an ACCEPT, land one chained
 ledger entry, and have the receipt re-verify later on its own."""
 
-from vouch.verifier import verify_receipt
+from detects.verifier import verify_receipt
 
 
 def test_happy_path_accepts_and_chains(harness, ledger, sum_spec):

@@ -1,9 +1,9 @@
-"""vouch - a standalone agent-execution verification harness.
+"""detects - a standalone agent-execution verification harness.
 
-An agent claims it completed a task. ``vouch`` turns that claim into an
+An agent claims it completed a task. ``detects`` turns that claim into an
 immutable, Ed25519-signed evidence receipt that binds *task*, *run*, and
 *source/runtime* identity, and gives you a pure verifier
-(:func:`vouch.verify_receipt`) you can point at receipts it did not create.
+(:func:`detects.verify_receipt`) you can point at receipts it did not create.
 
 See ``README.md`` for the failure model and ``ARCHITECTURE.md`` for the
 receipt lifecycle and the full list of checks. ``SECURITY.md`` and the
@@ -37,12 +37,12 @@ from .reexec import (
 from .schema import (
     SCHEMA_VERSION,
     Check,
+    DetectsError,
+    DetectsParseError,
     Receipt,
     Run,
     TaskSpec,
     VerdictReport,
-    VouchError,
-    VouchParseError,
     parse_receipt,
     signing_payload,
     task_id_for,
@@ -58,6 +58,8 @@ __all__ = [
     "Check",
     # clocks
     "Clock",
+    "DetectsError",
+    "DetectsParseError",
     # fixtures
     "Fixture",
     # runtime pieces
@@ -77,8 +79,6 @@ __all__ = [
     "SystemClock",
     "TaskSpec",
     "VerdictReport",
-    "VouchError",
-    "VouchParseError",
     "__version__",
     # serialization
     "canon_bytes",

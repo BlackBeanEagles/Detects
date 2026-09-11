@@ -4,13 +4,13 @@ check cannot (a wrong-but-still-prime nth_prime result)."""
 import io
 import json
 
-from vouch import reexec
-from vouch.canon import digest
-from vouch.harness import Harness
-from vouch.identity import sign
-from vouch.reexec import InProcessReexecutor, SubprocessReexecutor
-from vouch.schema import TaskSpec, signing_payload
-from vouch.verifier import verify_receipt
+from detects import reexec
+from detects.canon import digest
+from detects.harness import Harness
+from detects.identity import sign
+from detects.reexec import InProcessReexecutor, SubprocessReexecutor
+from detects.schema import TaskSpec, signing_payload
+from detects.verifier import verify_receipt
 
 PRIME_SPEC = TaskSpec(
     name="nth_prime", inputs={"n": 10}, declared_postconditions=["output_is_prime"]

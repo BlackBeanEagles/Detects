@@ -1,10 +1,10 @@
 """Failure mode 3: the receipt is well-formed but its evidence does not hold
 up - bad signature, tampered body, fabricated witness, unknown task."""
 
-from vouch.canon import digest
-from vouch.identity import sign
-from vouch.schema import TaskSpec, signing_payload
-from vouch.verifier import verify_receipt
+from detects.canon import digest
+from detects.identity import sign
+from detects.schema import TaskSpec, signing_payload
+from detects.verifier import verify_receipt
 
 
 def _resign(receipt, key):
